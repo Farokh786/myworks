@@ -1,5 +1,4 @@
-dash
+streamlit
 pandas
-plotly
 openpyxl
-
+plotly
