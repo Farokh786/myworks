@@ -1,7 +1,8 @@
-
-import streamlit as st
+import dash
 import pandas as pd
-import matplotlib.pyplot as plt
+from dash import dcc, html, Input, Output
+import plotly.express as px
+
 
 st.set_page_config(page_title="iOutlet Education Sales Dashboard", layout="wide")
 
