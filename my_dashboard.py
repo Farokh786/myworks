@@ -1,6 +1,6 @@
 import dash
+import streamlit as st
 import pandas as pd
-from dash import dcc, html, Input, Output
 import plotly.express as px
 
 
