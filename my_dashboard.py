@@ -14,9 +14,6 @@ st.markdown("""
 **Project Title:** *Maximising Impact: The iOutlet's Strategic Expansion in Education*
 
 **Company:** The iOutlet  
-**Contact Person:** Russell Jones  
-**Location:** Unit 37A Sisna Park, Estover, Plymouth, PL6 7FH  
-**Email:** russell@theioutlet.com  
 **Website:** [theioutlet.com](https://www.theioutlet.com)
 
 **Project Goal:**  
