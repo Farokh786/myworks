@@ -2,11 +2,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import requests
-import io
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib
 import requests
 import io
