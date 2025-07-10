@@ -9,7 +9,7 @@ import io
 # Project Overview
 # --------------------------
 st.set_page_config(page_title="iOutlet Education Expansion Dashboard", layout="wide")
-st.title("📊 The iOutlet Strategic Dashboard")
+st.title("The iOutlet Strategic Dashboard")
 st.markdown("""
 **Project Title:** *Maximising Impact: The iOutlet's Strategic Expansion in Education*
 
@@ -120,7 +120,7 @@ st.pyplot(fig4)
 # --------------------------
 # Strategic Recommendations
 # --------------------------
-st.markdown("### 💡 Strategic Recommendations")
+st.markdown("### Strategic Recommendations")
 st.markdown("""
 - Focus marketing efforts on **Academies** and **Secondary Schools**.
 - Prioritize high-performing regions like **London**, **West Midlands**, and **North West**.
