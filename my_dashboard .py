@@ -67,6 +67,14 @@ def load_data():
 
 sales_df, schools_df = load_data()
 edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"]
+# Clean and standardize Region column
+edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
+
+# Define valid UK regions to include
+valid_regions = ['England', 'Wales', 'Scotland', 'Northern Ireland', 'Isle Of Man', 'Jersey', 'Guernsey']
+edu_df = edu_df[edu_df['Region'].isin(valid_regions)]
+
+
 
 # --------------------------
 # KPIs
