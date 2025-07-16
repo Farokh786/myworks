@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 import io
+import seaborn as sns
 
 # --------------------------
 # Project Overview
@@ -117,8 +118,6 @@ st.pyplot(fig4)
 # --------------------------
 # Pain Points Analysis
 # --------------------------
-import seaborn as sns  # Ensure Seaborn is already imported above
-
 # Define pain points and impact scores
 pain_points = {
     'Limited Financial Resources': 9,
