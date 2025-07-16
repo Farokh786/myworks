@@ -108,7 +108,7 @@ You can see seasonal peaks and overall growth, helping identify periods of highe
 # School Segmentation
 # --------------------------
 
-
+st.markdown("### 🏫 Orders by School Type and Region")
 
 school_types = edu_df["School Type"].dropna().value_counts()
 
@@ -121,7 +121,6 @@ with colA:
     school_types.plot(kind='bar', color='dodgerblue', ax=ax2)
     ax2.set_title("Orders by School Type")
     st.pyplot(fig2)
-    st.markdown("### 🏫 Orders by School Type and Region")
     st.markdown("""
 This bar chart displays the number of orders placed by different school types, such as primary, secondary, and special education schools.  
 It helps us understand which school segments are purchasing most frequently and guides targeted sales strategies.
@@ -134,10 +133,11 @@ with colB:
     ax3.set_title("Orders by Region")
     ax3.axis('equal')
     st.pyplot(fig3)
-st.markdown("""
+    st.markdown("""
 The pie chart illustrates the distribution of orders across UK regions.  
 This reveals geographical hotspots of demand and potential regions for expansion efforts.
 """)
+    
 # --------------------------
 # Regional Sales Breakdown
 # --------------------------
