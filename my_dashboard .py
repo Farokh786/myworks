@@ -93,15 +93,36 @@ with colB:
     st.pyplot(fig3)
 
 # --------------------------
-# Regional Sales Insights
+# Regional Sales Insights - Fix
 # --------------------------
 st.markdown("### 🌍 Regional Sales Breakdown")
-region_sales = edu_df.groupby('Region')['Item Total'].sum().sort_values(ascending=False)
-top_schools = edu_df.groupby('School Match')['Item Total'].sum().sort_values(ascending=False).head(10)
 
-st.bar_chart(region_sales)
+# Clean region column: strip whitespace and drop NaNs
+edu_df['Region'] = edu_df['Region'].astype(str).str.strip()
+region_sales = edu_df.groupby('Region')['Item Total'].sum()
+
+# Remove any empty or 'nan' string regions that might have come from conversion
+region_sales = region_sales[region_sales.index.str.lower() != 'nan']
+region_sales = region_sales[region_sales.index != '']
+
+# Sort descending
+region_sales = region_sales.sort_values(ascending=False)
+
+# Plot bar chart with clearer labels
+fig_region, ax_region = plt.subplots(figsize=(10,6))
+region_sales.plot(kind='bar', ax=ax_region, color='skyblue')
+ax_region.set_ylabel("Revenue (£)")
+ax_region.set_title("Revenue by Region")
+ax_region.set_xticklabels(region_sales.index, rotation=45, ha='right')
+ax_region.grid(axis='y')
+
+st.pyplot(fig_region)
+
+# Show top 10 schools by revenue (no change)
+top_schools = edu_df.groupby('School Match')['Item Total'].sum().sort_values(ascending=False).head(10)
 st.markdown("**Top 10 Schools by Revenue:**")
 st.dataframe(top_schools)
+
 
 # --------------------------
 # Product Insights
