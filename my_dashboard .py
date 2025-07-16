@@ -115,6 +115,37 @@ ax4.set_title("Top Item Types Sold")
 st.pyplot(fig4)
 
 # --------------------------
+# Pain Points Analysis
+# --------------------------
+import seaborn as sns  # Ensure Seaborn is already imported above
+
+# Define pain points and impact scores
+pain_points = {
+    'Limited Financial Resources': 9,
+    'Procurement Seasonality': 7,
+    'Technology Access Gaps': 6,
+    'Environmental Compliance': 8,
+    'Inadequate IT Support Capacity': 6,
+    'Complex Procurement Processes': 7,
+    'Diverse Institutional Needs': 8
+}
+
+# Convert to DataFrame and sort
+df_pain = pd.DataFrame(list(pain_points.items()), columns=['Pain Point', 'Impact Score'])
+df_pain.sort_values('Impact Score', ascending=True, inplace=True)
+
+# Plotting
+st.markdown("### 🚧 Pain Points in School Technology Procurement")
+st.markdown("This analysis highlights key challenges schools face when acquiring technology, helping tailor The iOutlet's value proposition.")
+
+fig5, ax5 = plt.subplots(figsize=(10, 6))
+sns.barplot(x='Impact Score', y='Pain Point', data=df_pain, palette='crest', ax=ax5)
+ax5.set_title('Key Pain Points in UK School Technology Procurement')
+ax5.set_xlabel('Impact (1 = Low, 10 = High)')
+ax5.set_ylabel('')
+st.pyplot(fig5)
+
+# --------------------------
 # Strategic Recommendations
 # --------------------------
 st.markdown("### Strategic Recommendations")
