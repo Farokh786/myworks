@@ -112,7 +112,7 @@ st.markdown("### 🏫 Orders by School Type and Region")
 
 school_types = edu_df["School Type"].dropna().value_counts()
 
-st.markdown("### 🌍 Orders by Region")
+
 
 regions = edu_df["Region"].dropna().value_counts()
 colA, colB = st.columns([3, 2])
@@ -125,6 +125,7 @@ st.markdown("""
 This bar chart displays the number of orders placed by different school types, such as primary, secondary, and special education schools.  
 It helps us understand which school segments are purchasing most frequently and guides targeted sales strategies.
 """)
+st.markdown("### 🌍 Orders by Region")
 with colB:
     fig3, ax3 = plt.subplots(figsize=(6, 6))
     regions.plot(kind='pie', autopct='%1.1f%%', ax=ax3, textprops={'fontsize': 8})
