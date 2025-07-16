@@ -108,7 +108,7 @@ You can see seasonal peaks and overall growth, helping identify periods of highe
 # School Segmentation
 # --------------------------
 
-st.markdown("### 🏫 Orders by School Type and Region")
+st.markdown("### 🏫 Orders by School Type")
 
 school_types = edu_df["School Type"].dropna().value_counts()
 
