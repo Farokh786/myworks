@@ -147,11 +147,18 @@ This bar chart presents total revenue generated from each region.
 It highlights the most lucrative areas, informing where The iOutlet might focus sales and marketing resources.
 """)
 
-edu_df['Region'] = edu_df['Region'].astype(str).str.strip()
-region_sales = edu_df.groupby('Region')['Item Total'].sum()
-region_sales = region_sales[region_sales.index.str.lower() != 'nan']
-region_sales = region_sales[region_sales.index != '']
+# === Fix: Clean and normalize 'Region' column ===
+edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
+# Remove invalid or empty regions:
+edu_df = edu_df[edu_df['Region'].notna()]
+edu_df = edu_df[edu_df['Region'] != '']
+edu_df = edu_df[edu_df['Region'].str.lower() != 'nan']
+
+# Group and sum sales by cleaned region
+region_sales = edu_df.groupby('Region')['Item Total'].sum()
+
+# Sort descending for better visualization
 region_sales = region_sales.sort_values(ascending=False)
 
 fig_region, ax_region = plt.subplots(figsize=(8, 4))
@@ -274,5 +281,3 @@ if school_type_filter != "All":
     filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
 
 st.sidebar.metric("Filtered Sales", f"£{filtered_df['Item Total'].sum():,.2f}")
-csv = filtered_df.to_csv(index=False).encode('utf-8')
-st.sidebar.download_button("⬇️ Download Filtered Data", csv, "filtered_education_sales.csv", "text/csv")
