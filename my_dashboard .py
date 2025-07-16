@@ -185,16 +185,71 @@ solution_df = pd.DataFrame(pain_solution_data)
 st.dataframe(solution_df, use_container_width=True)
 
 # --------------------------
-# Strategic Recommendations
+# Strategic Action Plan Dashboard Section
 # --------------------------
-st.markdown("### Strategic Recommendations")
+st.markdown("## 🧭 Strategic Insights & Recommendations")
 st.markdown("""
-- Focus marketing efforts on **Academies** and **Secondary Schools**.
-- Prioritize high-performing regions like **London**, **West Midlands**, and **North West**.
-- Bundle deals for iPads and MacBooks aimed at school tech refresh cycles.
-- Implement loyalty programs to improve repeat orders from existing schools.
-- Align offerings with sustainability and cost-efficiency goals in education procurement.
+This section outlines evidence-based strategic actions designed to align with schools’ needs and The iOutlet’s commercial and environmental goals.
 """)
+
+# Structured Strategic Recommendations
+recommendations = [
+    {
+        "Action": "1. Offer Education-Specific Device Packages",
+        "Details": """
+- Bundle iPads or MacBooks with cases, charging carts, and pre-installed software.
+- Enhances usability and aligns with school tech needs.
+- **Citation:** Sacred Heart Catholic Primary School’s remote learning model (2024).
+"""
+    },
+    {
+        "Action": "2. Provide Financial Flexibility Through Leasing and Trade-In Programs",
+        "Details": """
+- Introduce leasing, trade-in and subscription plans to support affordability and device refresh.
+- **Citation:** ICT Reverse (2024); ScienceDirect comparative study (2009).
+"""
+    },
+    {
+        "Action": "3. Champion Environmental Sustainability in B2B Outreach",
+        "Details": """
+- Highlight carbon reductions, certified refurbishing, and tree planting schemes.
+- **Citation:** Clarion Communications ICT Sustainability; Ellen MacArthur Foundation.
+"""
+    },
+    {
+        "Action": "4. Launch a Tailored Procurement Platform for Schools",
+        "Details": """
+- Create a dedicated interface with quotes, framework tools, and education-specific pricing.
+- **Citation:** UK DfE Technology Procurement Guidance (2025).
+"""
+    },
+    {
+        "Action": "5. Introduce Technical Support and Training Services",
+        "Details": """
+- Offer onboarding, remote IT help, and training with education bulk orders.
+- **Citation:** ScienceDirect (2021) – EdTech in low-IT environments.
+"""
+    },
+    {
+        "Action": "6. Pursue Consortia and Framework Inclusion",
+        "Details": """
+- Join Crown Commercial Services and MAT-level procurement groups.
+- **Citation:** Clarion’s involvement in “Connect the Classroom”.
+"""
+    },
+    {
+        "Action": "7. Utilise Analytical Dashboards to Guide Sales Strategy",
+        "Details": """
+- Apply dashboard insights to segment school types and regional demand.
+- **Citation:** Internship-generated data dashboards (2025).
+"""
+    }
+]
+
+for rec in recommendations:
+    with st.expander(rec["Action"]):
+        st.markdown(rec["Details"])
+
 
 # --------------------------
 # Filters & Export
