@@ -289,6 +289,7 @@ for rec in recommendations:
 st.sidebar.markdown("## 🔍 Filter Options")
 region_filter = st.sidebar.selectbox("Select Region", options=['All'] + sorted(edu_df['Region'].dropna().unique()))
 school_type_filter = st.sidebar.selectbox("Select School Type", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
+trust_match_filter = st.sidebar.selectbox("Filter by Trust Match", options=['All', 'Matched Only'])
 
 filtered_df = edu_df.copy()
 if region_filter != "All":
