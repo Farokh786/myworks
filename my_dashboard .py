@@ -146,6 +146,46 @@ ax5.set_ylabel('')
 st.pyplot(fig5)
 
 # --------------------------
+# Pain Point to Solution Mapping
+# --------------------------
+st.markdown("### 🧩 Pain Point–Solution Mapping")
+st.markdown("The table below aligns each pain point with a tailored strategy from The iOutlet to maximise market fit and impact.")
+
+pain_solution_data = [
+    {
+        "Pain Point": "Limited Financial Resources",
+        "Proposed iOutlet Solution": "Offer cost-effective refurbished devices, bulk education discounts, and financing options."
+    },
+    {
+        "Pain Point": "Procurement Seasonality",
+        "Proposed iOutlet Solution": "Plan inventory cycles around academic year peaks and offer pre-order bundles."
+    },
+    {
+        "Pain Point": "Technology Access Gaps",
+        "Proposed iOutlet Solution": "Supply large-volume, affordable tablet/laptop bundles to close access gaps in low-income schools."
+    },
+    {
+        "Pain Point": "Environmental Compliance",
+        "Proposed iOutlet Solution": "Highlight sustainability credentials, carbon offsetting, and e-waste reduction certifications."
+    },
+    {
+        "Pain Point": "Inadequate IT Support Capacity",
+        "Proposed iOutlet Solution": "Provide optional setup support, remote diagnostics, and educational IT care packages."
+    },
+    {
+        "Pain Point": "Complex Procurement Processes",
+        "Proposed iOutlet Solution": "Simplify ordering with dedicated account managers and pre-approved tender documentation."
+    },
+    {
+        "Pain Point": "Diverse Institutional Needs",
+        "Proposed iOutlet Solution": "Customise offerings by institution type (e.g. MATs, SEN schools) through flexible product and service bundles."
+    }
+]
+
+solution_df = pd.DataFrame(pain_solution_data)
+st.dataframe(solution_df, use_container_width=True)
+
+# --------------------------
 # Strategic Recommendations
 # --------------------------
 st.markdown("### Strategic Recommendations")
