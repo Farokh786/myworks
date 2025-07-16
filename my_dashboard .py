@@ -59,6 +59,11 @@ col5.metric("⚖️ Repeat Orders %", f"{repeat_order_rate:.1f}%")
 # Monthly Sales Trends
 # --------------------------
 st.markdown("### 📈 Monthly Sales Trends")
+st.markdown("""
+This line chart shows the total revenue over time, comparing all sales with those specifically from the education sector.  
+You can see seasonal peaks and overall growth, helping identify periods of higher demand and sales trends.
+""")
+
 monthly_sales = sales_df.resample('MS', on='Order Date')['Item Total'].sum()
 monthly_edu = edu_df.resample('MS', on='Order Date')['Item Total'].sum()
 
@@ -75,7 +80,18 @@ st.pyplot(fig1)
 # School Segmentation
 # --------------------------
 st.markdown("### 🏫 Orders by School Type and Region")
+
+st.markdown("""
+This bar chart displays the number of orders placed by different school types, such as primary, secondary, and special education schools.  
+It helps us understand which school segments are purchasing most frequently and guides targeted sales strategies.
+""")
 school_types = edu_df["School Type"].dropna().value_counts()
+
+st.markdown("### 🌍 Orders by Region")
+st.markdown("""
+The pie chart illustrates the distribution of orders across UK regions.  
+This reveals geographical hotspots of demand and potential regions for expansion efforts.
+""")
 regions = edu_df["Region"].dropna().value_counts()
 
 colA, colB = st.columns(2)
@@ -93,15 +109,17 @@ with colB:
     st.pyplot(fig3)
 
 # --------------------------
-# Regional Sales Insights - Fix
+# Regional Sales Insights 
 # --------------------------
 st.markdown("### 🌍 Regional Sales Breakdown")
+st.markdown("""
+This bar chart presents total revenue generated from each region.  
+It highlights the most lucrative areas, informing where The iOutlet might focus sales and marketing resources.
+""")
 
-# Clean region column: strip whitespace and drop NaNs
+# Clean region column
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip()
 region_sales = edu_df.groupby('Region')['Item Total'].sum()
-
-# Remove any empty or 'nan' string regions that might have come from conversion
 region_sales = region_sales[region_sales.index.str.lower() != 'nan']
 region_sales = region_sales[region_sales.index != '']
 
@@ -118,7 +136,12 @@ ax_region.grid(axis='y')
 
 st.pyplot(fig_region)
 
-# Show top 10 schools by revenue (no change)
+# Show top 10 schools by revenue 
+st.markdown("### 🏆 Top 10 Schools by Revenue")
+st.markdown("""
+The table lists the top ten schools by total revenue from purchases.  
+This helps identify key accounts for relationship building and tailored offers.
+""")
 top_schools = edu_df.groupby('School Match')['Item Total'].sum().sort_values(ascending=False).head(10)
 st.markdown("**Top 10 Schools by Revenue:**")
 st.dataframe(top_schools)
@@ -128,6 +151,11 @@ st.dataframe(top_schools)
 # Product Insights
 # --------------------------
 st.markdown("### 📦 Top Items Sold in Education Sector")
+st.markdown("""
+This bar chart shows the most popular product types sold to educational customers, measured by units.  
+Understanding product preferences supports inventory and marketing decisions.
+""")
+
 top_items = edu_df.groupby("Item Type")["Quantity"].sum().sort_values(ascending=False)
 
 fig4, ax4 = plt.subplots()
@@ -156,6 +184,11 @@ df_pain.sort_values('Impact Score', ascending=True, inplace=True)
 
 # Plotting
 st.markdown("### 🚧 Pain Points in School Technology Procurement")
+st.markdown("""
+This bar plot ranks the major challenges schools face when purchasing technology, based on impact scores from 1 (low) to 10 (high).  
+Identifying these pain points helps The iOutlet craft solutions that directly address school needs.
+""")
+
 st.markdown("This analysis highlights key challenges schools face when acquiring technology, helping tailor The iOutlet's value proposition.")
 
 fig5, ax5 = plt.subplots(figsize=(10, 6))
