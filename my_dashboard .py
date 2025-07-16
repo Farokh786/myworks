@@ -89,11 +89,6 @@ col5.metric("⚖️ Repeat Orders %", f"{repeat_order_rate:.1f}%")
 # Monthly Sales Trends
 # --------------------------
 st.markdown("### 📈 Monthly Sales Trends")
-st.markdown("""
-This line chart shows the total revenue over time, comparing all sales with those specifically from the education sector.  
-You can see seasonal peaks and overall growth, helping identify periods of higher demand and sales trends.
-""")
-
 monthly_sales = sales_df.resample('MS', on='Order Date')['Item Total'].sum()
 monthly_edu = edu_df.resample('MS', on='Order Date')['Item Total'].sum()
 
@@ -105,7 +100,10 @@ ax1.set_ylabel("£")
 ax1.legend()
 ax1.grid(True)
 st.pyplot(fig1)
-
+st.markdown("""
+This line chart shows the total revenue over time, comparing all sales with those specifically from the education sector.  
+You can see seasonal peaks and overall growth, helping identify periods of higher demand and sales trends.
+""")
 # --------------------------
 # School Segmentation
 # --------------------------
