@@ -139,55 +139,42 @@ with colB:
     st.pyplot(fig3)
 
 # --------------------------
-# Regional Sales Insights
+# Regional Sales Breakdown
 # --------------------------
 st.markdown("### 🌍 Regional Sales Breakdown")
 st.markdown("""
-This bar chart presents total revenue generated from each region.  
-It highlights the most lucrative areas, informing where The iOutlet might focus sales and marketing resources.
+This bar chart presents total revenue generated from each UK region.  
+It highlights lucrative areas and sales distribution, helping focus marketing and sales efforts.
 """)
 
-# --- Fix: Clean and normalize 'Region' column for consistent grouping ---
+# Clean and normalize the 'Region' column
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
-# Remove invalid or empty regions:
-edu_df = edu_df[edu_df['Region'].notna()]
-edu_df = edu_df[edu_df['Region'] != '']
-edu_df = edu_df[edu_df['Region'].str.lower() != 'nan']
+# Filter out invalid or missing regions
+valid_regions_df = edu_df[(edu_df['Region'] != '') & (edu_df['Region'].str.lower() != 'nan')]
 
-region_sales = edu_df.groupby('Region')['Item Total'].sum()
-region_sales = region_sales.sort_values(ascending=False)
+# Aggregate revenue by region
+region_sales = valid_regions_df.groupby('Region')['Item Total'].sum().sort_values(ascending=False)
 
-fig_region, ax_region = plt.subplots(figsize=(8, 4))
-region_sales.plot(kind='bar', ax=ax_region, color='skyblue')
-ax_region.set_ylabel("Revenue (£)")
-ax_region.set_title("Revenue by Region")
-ax_region.set_xticklabels(region_sales.index, rotation=45, ha='right', fontsize=8)
-ax_region.grid(axis='y')
+# Plotting with Seaborn for a nicer style
+import matplotlib.ticker as ticker
 
-st.pyplot(fig_region)
+fig, ax = plt.subplots(figsize=(12, 6))
+sns.barplot(x=region_sales.values, y=region_sales.index, palette='viridis', ax=ax)
 
-# --- New: Percentage of Orders by Region Line Chart ---
-st.markdown("### 📊 Percentage of Orders by Region (Line Chart)")
-st.markdown("""
-This line chart shows the percentage distribution of total orders by UK region.  
-It provides a clear view of the relative activity across all regions.
-""")
+# Format x-axis as £ currency with commas
+ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'£{int(x):,}'))
 
-region_order_counts = edu_df['Region'].value_counts().reset_index()
-region_order_counts.columns = ['Region', 'Number of Orders']
-region_order_counts['Percentage'] = (region_order_counts['Number of Orders'] / region_order_counts['Number of Orders'].sum()) * 100
-region_order_counts = region_order_counts.sort_values(by='Region')
+ax.set_xlabel("Revenue (£)")
+ax.set_ylabel("Region")
+ax.set_title("Total Sales Revenue by Region")
+ax.grid(axis='x', linestyle='--', alpha=0.7)
 
-fig_orders_pct, ax_orders_pct = plt.subplots(figsize=(10, 5))
-ax_orders_pct.plot(region_order_counts['Region'], region_order_counts['Percentage'], marker='o', linestyle='-', color='dodgerblue')
-ax_orders_pct.set_title('Percentage of Orders by Region')
-ax_orders_pct.set_xlabel('Region')
-ax_orders_pct.set_ylabel('Percentage of Total Orders')
-ax_orders_pct.grid(True)
-plt.xticks(rotation=45)
+# Tight layout for spacing
 plt.tight_layout()
-st.pyplot(fig_orders_pct)
+
+st.pyplot(fig)
+
 
 # --------------------------
 # Top 10 Schools by Revenue
