@@ -147,7 +147,7 @@ This bar chart presents total revenue generated from each region.
 It highlights the most lucrative areas, informing where The iOutlet might focus sales and marketing resources.
 """)
 
-# === Fix: Clean and normalize 'Region' column ===
+# --- Fix: Clean and normalize 'Region' column for consistent grouping ---
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
 # Remove invalid or empty regions:
@@ -155,10 +155,7 @@ edu_df = edu_df[edu_df['Region'].notna()]
 edu_df = edu_df[edu_df['Region'] != '']
 edu_df = edu_df[edu_df['Region'].str.lower() != 'nan']
 
-# Group and sum sales by cleaned region
 region_sales = edu_df.groupby('Region')['Item Total'].sum()
-
-# Sort descending for better visualization
 region_sales = region_sales.sort_values(ascending=False)
 
 fig_region, ax_region = plt.subplots(figsize=(8, 4))
@@ -170,7 +167,31 @@ ax_region.grid(axis='y')
 
 st.pyplot(fig_region)
 
-# Show top 10 schools by revenue
+# --- New: Percentage of Orders by Region Line Chart ---
+st.markdown("### 📊 Percentage of Orders by Region (Line Chart)")
+st.markdown("""
+This line chart shows the percentage distribution of total orders by UK region.  
+It provides a clear view of the relative activity across all regions.
+""")
+
+region_order_counts = edu_df['Region'].value_counts().reset_index()
+region_order_counts.columns = ['Region', 'Number of Orders']
+region_order_counts['Percentage'] = (region_order_counts['Number of Orders'] / region_order_counts['Number of Orders'].sum()) * 100
+region_order_counts = region_order_counts.sort_values(by='Region')
+
+fig_orders_pct, ax_orders_pct = plt.subplots(figsize=(10, 5))
+ax_orders_pct.plot(region_order_counts['Region'], region_order_counts['Percentage'], marker='o', linestyle='-', color='dodgerblue')
+ax_orders_pct.set_title('Percentage of Orders by Region')
+ax_orders_pct.set_xlabel('Region')
+ax_orders_pct.set_ylabel('Percentage of Total Orders')
+ax_orders_pct.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+st.pyplot(fig_orders_pct)
+
+# --------------------------
+# Top 10 Schools by Revenue
+# --------------------------
 st.markdown("### 🏆 Top 10 Schools by Revenue")
 st.markdown("""
 The table lists the top ten schools by total revenue from purchases.  
@@ -281,3 +302,5 @@ if school_type_filter != "All":
     filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
 
 st.sidebar.metric("Filtered Sales", f"£{filtered_df['Item Total'].sum():,.2f}")
+csv = filtered_df.to_csv(index=False).encode('utf-8')
+st.sidebar.download_button("⬇️ Download Filtered Data", csv, "filtered_education_sales.csv", "text/csv")
