@@ -66,13 +66,29 @@ def load_data():
     return sales_df, schools_df
 
 sales_df, schools_df = load_data()
-edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"]
-# Clean and standardize Region column
+# Clean 'Region' column
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
-# Define valid UK regions to include
-valid_regions = ['England', 'Wales', 'Scotland', 'Northern Ireland', 'Isle Of Man', 'Jersey', 'Guernsey']
-edu_df = edu_df[edu_df['Region'].isin(valid_regions)]
+# Define allowed regions explicitly, in desired order
+allowed_regions = [
+    "Guernsey",
+    "Jersey",
+    "Isle Of Man",
+    "Scotland",
+    "Northern Ireland",
+    "Wales",
+    "England"
+]
+
+# Filter edu_df to only these regions (optional, if you want to limit data too)
+# edu_df = edu_df[edu_df['Region'].isin(allowed_regions)]
+
+# Create dropdown options with 'All' + allowed regions that actually appear in data
+region_options = ['All'] + [r for r in allowed_regions if r in edu_df['Region'].unique()]
+
+# In sidebar selectbox, use this fixed list instead of dynamic:
+region_filter = st.sidebar.selectbox("Select Region", options=region_options)
+
 
 
 
@@ -289,7 +305,6 @@ for rec in recommendations:
 st.sidebar.markdown("## 🔍 Filter Options")
 region_filter = st.sidebar.selectbox("Select Region", options=['All'] + sorted(edu_df['Region'].dropna().unique()))
 school_type_filter = st.sidebar.selectbox("Select School Type", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
-trust_match_filter = st.sidebar.selectbox("Filter by Trust Match", options=['All', 'Matched Only'])
 
 filtered_df = edu_df.copy()
 if region_filter != "All":
