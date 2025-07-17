@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 import requests
 import io
 import seaborn as sns
+import matplotlib.ticker as ticker
 
 # --------------------------
-# Responsive CSS for better display on all devices
+# Streamlit page config and CSS
 # --------------------------
+st.set_page_config(page_title="iOutlet Education Expansion Dashboard", layout="wide")
+
 st.markdown(
     """
     <style>
@@ -18,28 +21,16 @@ st.markdown(
 
     /* Responsive font sizes and padding */
     @media only screen and (max-width: 600px) {
-        h1 {
-            font-size: 1.5rem !important;
-        }
-        h2 {
-            font-size: 1.3rem !important;
-        }
-        h3 {
-            font-size: 1.1rem !important;
-        }
-        .css-1v3fvcr {
-            padding-left: 8px !important;
-            padding-right: 8px !important;
-        }
+        h1 { font-size: 1.5rem !important; }
+        h2 { font-size: 1.3rem !important; }
+        h3 { font-size: 1.1rem !important; }
+        .css-1v3fvcr { padding-left: 8px !important; padding-right: 8px !important; }
     }
     </style>
-    """, unsafe_allow_html=True
+    """,
+    unsafe_allow_html=True
 )
 
-# --------------------------
-# Project Overview
-# --------------------------
-st.set_page_config(page_title="iOutlet Education Expansion Dashboard", layout="wide")
 st.title("The iOutlet Strategic Dashboard")
 st.markdown("""
 **Project Title:** *Maximising Impact: The iOutlet's Strategic Expansion in Education*
@@ -67,9 +58,8 @@ def load_data():
 
 sales_df, schools_df = load_data()
 
+# Filter to matched schools and clean Region column
 edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"].copy()
-
-# Clean Region column
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
 allowed_regions = [
@@ -82,21 +72,28 @@ allowed_regions = [
     "England"
 ]
 
+# Create region options list for sidebar dropdown (only regions present in edu_df)
 region_options = ['All'] + [r for r in allowed_regions if r in edu_df['Region'].unique()]
 
-region_filter = st.sidebar.selectbox("Select Region", options=region_options)
+# --------------------------
+# Sidebar Filters
+# --------------------------
+st.sidebar.markdown("## 🔍 Filter Options")
 
-# Filter edu_df to only these regions (optional, if you want to limit data too)
-# edu_df = edu_df[edu_df['Region'].isin(allowed_regions)]
+region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
+school_types_list = sorted(edu_df['School Type'].dropna().unique())
+school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + school_types_list)
 
-# Create dropdown options with 'All' + allowed regions that actually appear in data
-region_options = ['All'] + [r for r in allowed_regions if r in edu_df['Region'].unique()]
+# Apply filters to data
+filtered_df = edu_df.copy()
+if region_filter != 'All':
+    filtered_df = filtered_df[filtered_df['Region'] == region_filter]
+if school_type_filter != 'All':
+    filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
 
-# In sidebar selectbox, use this fixed list instead of dynamic:
-region_filter = st.sidebar.selectbox("Select Region", options=region_options)
-
-
-
+st.sidebar.metric("Filtered Sales", f"£{filtered_df['Item Total'].sum():,.2f}")
+csv = filtered_df.to_csv(index=False).encode('utf-8')
+st.sidebar.download_button("⬇️ Download Filtered Data", csv, "filtered_education_sales.csv", "text/csv")
 
 # --------------------------
 # KPIs
@@ -106,7 +103,7 @@ edu_revenue = edu_df['Item Total'].sum()
 total_units = sales_df['Quantity'].sum()
 schools_reached = edu_df['School Match'].nunique()
 repeat_orders = edu_df.groupby('School Match')['Order ID'].nunique()
-repeat_order_rate = (repeat_orders[repeat_orders > 1].count() / schools_reached) * 100
+repeat_order_rate = (repeat_orders[repeat_orders > 1].count() / schools_reached) * 100 if schools_reached else 0
 
 col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("💰 Total Revenue", f"£{total_revenue:,.2f}")
@@ -134,18 +131,17 @@ st.markdown("""
 This line chart shows the total revenue over time, comparing all sales with those specifically from the education sector.  
 You can see seasonal peaks and overall growth, helping identify periods of higher demand and sales trends.
 """)
+
 # --------------------------
 # School Segmentation
 # --------------------------
-
 st.markdown("### 🏫 Orders by School Type")
 
 school_types = edu_df["School Type"].dropna().value_counts()
-
-
-
 regions = edu_df["Region"].dropna().value_counts()
+
 colA, colB = st.columns([3, 2])
+
 with colA:
     fig2, ax2 = plt.subplots(figsize=(8, 4))
     school_types.plot(kind='bar', color='dodgerblue', ax=ax2)
@@ -157,9 +153,9 @@ It helps us understand which school segments are purchasing most frequently and 
 """)
 
 with colB:
+    st.markdown("### 🌍 Orders by Region")
     fig3, ax3 = plt.subplots(figsize=(6, 6))
     regions.plot(kind='pie', autopct='%1.1f%%', ax=ax3, textprops={'fontsize': 8})
-    st.markdown("### 🌍 Orders by Region")
     ax3.set_title("Orders by Region")
     ax3.axis('equal')
     st.pyplot(fig3)
@@ -167,7 +163,7 @@ with colB:
 The pie chart illustrates the distribution of orders across UK regions.  
 This reveals geographical hotspots of demand and potential regions for expansion efforts.
 """)
-    
+
 # --------------------------
 # Regional Sales Breakdown
 # --------------------------
@@ -177,34 +173,20 @@ This bar chart presents total revenue generated from each UK region.
 It highlights lucrative areas and sales distribution, helping focus marketing and sales efforts.
 """)
 
-# Clean and normalize the 'Region' column
-edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
-
-# Filter out invalid or missing regions
-valid_regions_df = edu_df[(edu_df['Region'] != '') & (edu_df['Region'].str.lower() != 'nan')]
-
-# Aggregate revenue by region
+# Filter out invalid or missing regions before aggregation
+valid_regions_df = edu_df[edu_df['Region'].str.strip().astype(bool)]
 region_sales = valid_regions_df.groupby('Region')['Item Total'].sum().sort_values(ascending=False)
 
-# Plotting with Seaborn for a nicer style
-import matplotlib.ticker as ticker
+fig4, ax4 = plt.subplots(figsize=(12, 6))
+sns.barplot(x=region_sales.values, y=region_sales.index, palette='viridis', ax=ax4)
 
-fig, ax = plt.subplots(figsize=(12, 6))
-sns.barplot(x=region_sales.values, y=region_sales.index, palette='viridis', ax=ax)
-
-# Format x-axis as £ currency with commas
-ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'£{int(x):,}'))
-
-ax.set_xlabel("Revenue (£)")
-ax.set_ylabel("Region")
-ax.set_title("Total Sales Revenue by Region")
-ax.grid(axis='x', linestyle='--', alpha=0.7)
-
-# Tight layout for spacing
+ax4.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'£{int(x):,}'))
+ax4.set_xlabel("Revenue (£)")
+ax4.set_ylabel("Region")
+ax4.set_title("Total Sales Revenue by Region")
+ax4.grid(axis='x', linestyle='--', alpha=0.7)
 plt.tight_layout()
-
-st.pyplot(fig)
-
+st.pyplot(fig4)
 
 # --------------------------
 # Top 10 Schools by Revenue
@@ -214,6 +196,7 @@ st.markdown("""
 The table lists the top ten schools by total revenue from purchases.  
 This helps identify key accounts for relationship building and tailored offers.
 """)
+
 top_schools = edu_df.groupby('School Match')['Item Total'].sum().sort_values(ascending=False).head(10)
 st.dataframe(top_schools, use_container_width=True)
 
@@ -228,11 +211,11 @@ Understanding product preferences supports inventory and marketing decisions.
 
 top_items = edu_df.groupby("Item Type")["Quantity"].sum().sort_values(ascending=False)
 
-fig4, ax4 = plt.subplots(figsize=(8, 4))
-top_items.plot(kind='bar', color='seagreen', ax=ax4)
-ax4.set_ylabel("Units")
-ax4.set_title("Top Item Types Sold")
-st.pyplot(fig4)
+fig5, ax5 = plt.subplots(figsize=(8, 4))
+top_items.plot(kind='bar', color='seagreen', ax=ax5)
+ax5.set_ylabel("Units")
+ax5.set_title("Top Item Types Sold")
+st.pyplot(fig5)
 
 # --------------------------
 # Pain Points Analysis
@@ -257,12 +240,12 @@ Identifying these pain points helps The iOutlet craft solutions that directly ad
 """)
 st.markdown("This analysis highlights key challenges schools face when acquiring technology, helping tailor The iOutlet's value proposition.")
 
-fig5, ax5 = plt.subplots(figsize=(8, 4))
-sns.barplot(x='Impact Score', y='Pain Point', data=df_pain, palette='crest', ax=ax5)
-ax5.set_title('Key Pain Points in UK School Technology Procurement')
-ax5.set_xlabel('Impact (1 = Low, 10 = High)')
-ax5.set_ylabel('')
-st.pyplot(fig5)
+fig6, ax6 = plt.subplots(figsize=(8, 4))
+sns.barplot(x='Impact Score', y='Pain Point', data=df_pain, palette='crest', ax=ax6)
+ax6.set_title('Key Pain Points in UK School Technology Procurement')
+ax6.set_xlabel('Impact (1 = Low, 10 = High)')
+ax6.set_ylabel('')
+st.pyplot(fig6)
 
 # --------------------------
 # Pain Point to Solution Mapping
@@ -304,23 +287,3 @@ recommendations = [
 for rec in recommendations:
     with st.expander(rec["Action"]):
         st.markdown(rec["Details"])
-
-# --------------------------
-# Filters & Export
-# --------------------------
-st.sidebar.markdown("## 🔍 Filter Options")
-
-region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
-school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
-
-filtered_df = edu_df.copy()
-if region_filter != 'All':
-    filtered_df = filtered_df[filtered_df['Region'] == region_filter]
-
-school_type_filter = st.sidebar.selectbox("Select School Type", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
-if school_type_filter != 'All':
-    filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
-
-st.sidebar.metric("Filtered Sales", f"£{filtered_df['Item Total'].sum():,.2f}")
-csv = filtered_df.to_csv(index=False).encode('utf-8')
-st.sidebar.download_button("⬇️ Download Filtered Data", csv, "filtered_education_sales.csv", "text/csv")
