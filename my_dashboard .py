@@ -309,8 +309,9 @@ for rec in recommendations:
 # Filters & Export
 # --------------------------
 st.sidebar.markdown("## 🔍 Filter Options")
-region_filter = st.sidebar.selectbox("Select Region", options=['All'] + sorted(edu_df['Region'].dropna().unique()))
-school_type_filter = st.sidebar.selectbox("Select School Type", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
+
+region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
+school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
 
 filtered_df = edu_df.copy()
 if region_filter != 'All':
