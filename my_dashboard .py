@@ -67,7 +67,12 @@ edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 # --------------------------
 st.sidebar.markdown("## 🔍 Filter Options")
 
-# Dynamically generate region options from unique regions in data
+view_mode = st.sidebar.radio(
+    "View Mode",
+    options=["All Sales", "Filtered by Region"],
+    index=1
+)
+
 region_options = ['All'] + sorted(edu_df['Region'].dropna().unique())
 region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
 
@@ -75,9 +80,13 @@ school_types_list = sorted(edu_df['School Type'].dropna().unique())
 school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + school_types_list)
 
 # Apply filters to data
-filtered_df = edu_df.copy()
-if region_filter != 'All':
-    filtered_df = filtered_df[filtered_df['Region'] == region_filter]
+if view_mode == "All Sales":
+    filtered_df = edu_df.copy()
+else:
+    filtered_df = edu_df.copy()
+    if region_filter != 'All':
+        filtered_df = filtered_df[filtered_df['Region'] == region_filter]
+
 if school_type_filter != 'All':
     filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
 
