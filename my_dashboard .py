@@ -62,25 +62,15 @@ sales_df, schools_df = load_data()
 edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"].copy()
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
-allowed_regions = [
-    "Guernsey",
-    "Jersey",
-    "Isle Of Man",
-    "Scotland",
-    "Northern Ireland",
-    "Wales",
-    "England"
-]
-
-# Create region options list for sidebar dropdown (only regions present in edu_df)
-region_options = ['All'] + [r for r in allowed_regions if r in edu_df['Region'].unique()]
-
 # --------------------------
 # Sidebar Filters
 # --------------------------
 st.sidebar.markdown("## 🔍 Filter Options")
 
+# Dynamically generate region options from unique regions in data
+region_options = ['All'] + sorted(edu_df['Region'].dropna().unique())
 region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
+
 school_types_list = sorted(edu_df['School Type'].dropna().unique())
 school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + school_types_list)
 
@@ -173,7 +163,6 @@ This bar chart presents total revenue generated from each UK region.
 It highlights lucrative areas and sales distribution, helping focus marketing and sales efforts.
 """)
 
-# Filter out invalid or missing regions before aggregation
 valid_regions_df = edu_df[edu_df['Region'].str.strip().astype(bool)]
 region_sales = valid_regions_df.groupby('Region')['Item Total'].sum().sort_values(ascending=False)
 
