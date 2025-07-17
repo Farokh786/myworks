@@ -1,90 +1,112 @@
 import streamlit as st
 import pandas as pd
-import requests
-import io
 import matplotlib.pyplot as plt
+import seaborn as sns
+from PIL import Image
 
 # --------------------------
-# Page Setup
+# Project Overview
 # --------------------------
-st.set_page_config(page_title="The iOutlet Education Dashboard", layout="wide")
-st.title("📊 The iOutlet Education Sector Dashboard")
+st.set_page_config(page_title="iOutlet Education Expansion Dashboard", layout="wide")
+st.title("The iOutlet Strategic Dashboard")
+st.markdown("""
+**Project Title:** *Maximising Impact: The iOutlet's Strategic Expansion in Education*
+
+**Intern:** Khwaja Abdul Ghani Ghafoori  
+**University:** University of Dundee | MSc Business Analytics and Finance  
+**Internship Period:** June – July 2025
+
+---
+""")
 
 # --------------------------
 # Load Data
 # --------------------------
-@st.cache_data
-def load_data():
-    file_url = "https://dmail-my.sharepoint.com/:x:/g/personal/2619506_dundee_ac_uk/ETLrFWlAs81NpHPN3_nhayEBVPVFauwk8jQCcwEt-cuv4Q?download=1"
-    response = requests.get(file_url)
-    bytes_io = io.BytesIO(response.content)
-    sales_df = pd.read_excel(bytes_io, sheet_name="Sales")
-    schools_df = pd.read_excel(bytes_io, sheet_name="Schools")
-    
-    # Preprocess
-    sales_df.columns = sales_df.columns.str.strip()
-    sales_df['Order Date'] = pd.to_datetime(sales_df['Order Date'], errors='coerce', dayfirst=True)
-    sales_df['Region'] = sales_df['Region'].astype(str).str.strip().str.title()
-    sales_df['School Type'] = sales_df['School Type'].astype(str).str.strip().str.title()
-    sales_df['Trust Matched'] = sales_df['Trust Matched'].astype(str).str.strip().str.title()
+file_path = r"E:\\MSc Business Analytics & Finance Jan25\\Business Analytics Project\\iOutlet_Internship\\Clean_data\\Merged_Data3.xlsx"
+sales_df = pd.read_excel(file_path, sheet_name="Sales")
+edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"]
 
-    return sales_df, schools_df
+# Clean and standardize Region column
+edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
-sales_df, schools_df = load_data()
+# Filter only valid UK regions
+valid_regions = ['England', 'Wales', 'Scotland', 'Northern Ireland', 'Isle Of Man', 'Jersey', 'Guernsey']
+edu_df = edu_df[edu_df['Region'].isin(valid_regions)]
 
 # --------------------------
 # Sidebar Filters
 # --------------------------
-st.sidebar.header("🔍 Filter by")
+st.sidebar.markdown("## 🔍 Filter Options")
+region_filter = st.sidebar.selectbox("Select Region", options=['All'] + sorted(edu_df['Region'].dropna().unique()))
+school_type_filter = st.sidebar.selectbox("Select School Type", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
+trust_match_filter = st.sidebar.selectbox("Filter by Trust Match", options=['All', 'Matched Only'])
 
-# Region Filter
-region_options = sorted(sales_df['Region'].dropna().unique())
-selected_region = st.sidebar.selectbox("Select Region", options=["All"] + region_options)
-
-# School Type Filter
-school_type_options = sorted(sales_df['School Type'].dropna().unique())
-selected_type = st.sidebar.selectbox("Select School Type", options=["All"] + school_type_options)
-
-# Trust Matched Filter
-trust_options = sorted(sales_df['Trust Matched'].dropna().unique())
-selected_trust = st.sidebar.selectbox("Select Trust Matched", options=["All"] + trust_options)
-
-# --------------------------
-# Filter Logic
-# --------------------------
-filtered_df = sales_df.copy()
-
-if selected_region != "All":
-    filtered_df = filtered_df[filtered_df['Region'] == selected_region]
-
-if selected_type != "All":
-    filtered_df = filtered_df[filtered_df['School Type'] == selected_type]
-
-if selected_trust != "All":
-    filtered_df = filtered_df[filtered_df['Trust Matched'] == selected_trust]
-
-edu_df = filtered_df[filtered_df['School Match'].str.lower() != "no match"]
+# Apply filters
+if region_filter != 'All':
+    edu_df = edu_df[edu_df['Region'] == region_filter]
+if school_type_filter != 'All':
+    edu_df = edu_df[edu_df['School Type'] == school_type_filter]
+if trust_match_filter == 'Matched Only':
+    edu_df = edu_df[edu_df['Trust Matched'].str.lower() == 'match']
 
 # --------------------------
-# KPIs
+# Metrics
 # --------------------------
-total_revenue = filtered_df['Item Total'].sum()
-edu_revenue = edu_df['Item Total'].sum()
-total_units = filtered_df['Quantity'].sum()
-schools_reached = edu_df['School Match'].nunique()
-repeat_orders = edu_df.groupby('School Match')['Order ID'].nunique()
-repeat_order_rate = (repeat_orders[repeat_orders > 1].count() / schools_reached * 100) if schools_reached > 0 else 0
+total_sales = edu_df['Total Price'].sum()
+total_orders = edu_df['Order Number'].nunique()
+total_customers = edu_df['Email'].nunique()
 
-col1, col2, col3, col4, col5 = st.columns(5)
-col1.metric("💰 Total Revenue", f"£{total_revenue:,.2f}")
-col2.metric("🎓 Education Revenue", f"£{edu_revenue:,.2f}")
-col3.metric("📦 Units Sold", f"{int(total_units):,}")
-col4.metric("🏫 Schools Reached", f"{schools_reached}")
-col5.metric("🔁 Repeat Order Rate", f"{repeat_order_rate:.1f}%")
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Sales", f"£{total_sales:,.0f}")
+col2.metric("Unique Orders", f"{total_orders}")
+col3.metric("Unique Customers", f"{total_customers}")
 
 # --------------------------
-# Optional Visualization Placeholder
+# Region-wise Sales Bar Chart
 # --------------------------
-st.subheader("📈 Sales Data Preview")
-st.dataframe(filtered_df.head(20))
+st.markdown("### 📊 Regional Sales Distribution")
+region_sales = edu_df.groupby('Region')['Total Price'].sum().reset_index().sort_values(by='Total Price', ascending=False)
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.barplot(x='Region', y='Total Price', data=region_sales, palette='Blues_d', ax=ax)
+ax.set_title("Sales by Region")
+ax.set_xlabel("Region")
+ax.set_ylabel("Total Sales (£)")
+plt.xticks(rotation=45)
+st.pyplot(fig)
 
+# --------------------------
+# School Type Analysis
+# --------------------------
+st.markdown("### 🏫 School Type Order Breakdown")
+school_counts = edu_df['School Type'].value_counts().reset_index()
+school_counts.columns = ['School Type', 'Order Count']
+fig2, ax2 = plt.subplots(figsize=(8, 4))
+sns.barplot(x='Order Count', y='School Type', data=school_counts, palette='Greens_d', ax=ax2)
+ax2.set_title("Orders by School Type")
+st.pyplot(fig2)
+
+# --------------------------
+# Monthly Sales Trends
+# --------------------------
+st.markdown("### 📈 Monthly Order Trend")
+edu_df['Order Date'] = pd.to_datetime(edu_df['Order Date'])
+edu_df['Month'] = edu_df['Order Date'].dt.to_period('M').astype(str)
+monthly_sales = edu_df.groupby('Month')['Total Price'].sum().reset_index()
+fig3, ax3 = plt.subplots(figsize=(10, 4))
+sns.lineplot(data=monthly_sales, x='Month', y='Total Price', marker='o', ax=ax3)
+ax3.set_title("Monthly Sales Over Time")
+ax3.set_ylabel("Sales (£)")
+plt.xticks(rotation=45)
+st.pyplot(fig3)
+
+# --------------------------
+# Data Table View
+# --------------------------
+st.markdown("### 🔍 Filtered Data Table")
+st.dataframe(edu_df[['Order Number', 'School Name', 'Region', 'School Type', 'Total Price', 'Order Date', 'Trust Matched']].sort_values(by='Order Date', ascending=False))
+
+# --------------------------
+# Footer
+# --------------------------
+st.markdown("---")
+st.markdown("Built by Khwaja Abdul Ghani Ghafoori | MSc Business Analytics & Finance | University of Dundee")
