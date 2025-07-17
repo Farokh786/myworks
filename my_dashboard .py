@@ -63,50 +63,50 @@ edu_df = sales_df[sales_df['School Match'].str.lower() != "no match"].copy()
 edu_df['Region'] = edu_df['Region'].astype(str).str.strip().str.title()
 
 # --------------------------
-# Sidebar Filters
+# Filters & Export sidebar section
 # --------------------------
 st.sidebar.markdown("## 🔍 Filter Options")
 
-view_mode = st.sidebar.radio(
-    "View Mode",
-    options=["All Sales", "Filtered by Region"],
-    index=1
+# Add this new sales view mode filter first
+sales_view_mode = st.sidebar.radio(
+    "View Sales Data for:",
+    options=["All Sales", "By Region"],
+    index=1  # default to "By Region"
 )
 
+# Then your existing region filter
 region_options = ['All'] + sorted(edu_df['Region'].dropna().unique())
 region_filter = st.sidebar.selectbox("Select Region (Filter)", options=region_options)
 
-school_types_list = sorted(edu_df['School Type'].dropna().unique())
-school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + school_types_list)
+# Then your existing school type filter
+school_type_filter = st.sidebar.selectbox("Select School Type (Filter)", options=['All'] + sorted(edu_df['School Type'].dropna().unique()))
 
-# Apply filters to data
-if view_mode == "All Sales":
-    filtered_df = edu_df.copy()
-else:
-    filtered_df = edu_df.copy()
-    if region_filter != 'All':
-        filtered_df = filtered_df[filtered_df['Region'] == region_filter]
+# Apply your current filters as usual
+filtered_df = edu_df.copy()
+if region_filter != 'All':
+    filtered_df = filtered_df[filtered_df['Region'] == region_filter]
 
 if school_type_filter != 'All':
     filtered_df = filtered_df[filtered_df['School Type'] == school_type_filter]
 
-st.sidebar.metric("Filtered Sales", f"£{filtered_df['Item Total'].sum():,.2f}")
-csv = filtered_df.to_csv(index=False).encode('utf-8')
-st.sidebar.download_button("⬇️ Download Filtered Data", csv, "filtered_education_sales.csv", "text/csv")
-
 # --------------------------
 # KPIs
 # --------------------------
-total_revenue = sales_df['Item Total'].sum()
-edu_revenue = edu_df['Item Total'].sum()
-total_units = sales_df['Quantity'].sum()
-schools_reached = edu_df['School Match'].nunique()
-repeat_orders = edu_df.groupby('School Match')['Order ID'].nunique()
+# Choose dataset for KPIs depending on sales_view_mode
+if sales_view_mode == "All Sales":
+    kpi_df = edu_df  # ignore filters for KPIs
+else:
+    kpi_df = filtered_df  # respect filters for KPIs
+
+total_revenue = kpi_df['Item Total'].sum()
+total_units = kpi_df['Quantity'].sum()
+schools_reached = kpi_df['School Match'].nunique()
+repeat_orders = kpi_df.groupby('School Match')['Order ID'].nunique()
 repeat_order_rate = (repeat_orders[repeat_orders > 1].count() / schools_reached) * 100 if schools_reached else 0
 
 col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("💰 Total Revenue", f"£{total_revenue:,.2f}")
-col2.metric("🎓 Education Revenue", f"£{edu_revenue:,.2f}")
+col2.metric("🎓 Education Revenue", f"£{kpi_df['Item Total'].sum():,.2f}")
 col3.metric("📦 Units Sold", f"{int(total_units):,}")
 col4.metric("🏫 Schools Reached", f"{schools_reached}")
 col5.metric("⚖️ Repeat Orders %", f"{repeat_order_rate:.1f}%")
